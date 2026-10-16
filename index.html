@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INCOME</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --bg-color: #f8fafc;
+            --box-bg: #ffffff;
+            --text-dark: #0f172a;
+            --border-color: #cbd5e1;
+            --success: #10b981;
+            --pb-color: #d97706;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--box-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary);
+        }
+        
+        /* State Selector Styling */
+        .state-selector-container {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--border-color);
+        }
+        .state-selector-container label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #334155;
+            margin-right: 10px;
+        }
+        .state-dropdown {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-weight: bold;
+            background-color: #eff6ff;
+            cursor: pointer;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--secondary);
+            font-size: 14px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+        }
+        input[readonly] {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+            font-weight: bold;
+            color: #0f172a;
+        }
+        
+        /* Uppercase input class for Punjab */
+        .uppercase-input {
+            text-transform: uppercase;
+        }
+
+        .submit-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        .submit-btn:hover {
+            background-color: var(--secondary);
+        }
+        .pb-btn {
+            background-color: var(--pb-color);
+        }
+        .pb-btn:hover {
+            background-color: #b45309;
+        }
+        .download-btn {
+            background-color: var(--success);
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            background-color: #059669;
+        }
+
+        /* Tabs */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s;
+        }
+        .active-tab {
+            display: block;
+        }
+
+        /* Shared Loader & Preview Elements */
+        #loadingMsg {
+            display: none;
+            text-align: center;
+            color: var(--primary);
+            font-weight: bold;
+            margin-top: 15px;
+            padding: 10px;
+            background: #eff6ff;
+            border-radius: 6px;
+        }
+        #previewSection {
+            display: none;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--border-color);
+        }
+        .preview-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- STATE SELECTOR (DROPDOWN) -->
+    <div class="state-selector-container">
+        <label for="stateSelect">राज्य चुनें (Select State):</label>
+        <select id="stateSelect" class="state-dropdown" onchange="switchState()">
+            <option value="UP">UTTAR PRADESH (उत्तर प्रदेश)</option>
+            <option value="PB">PUNJAB (पंजाब)</option>
+        </select>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 1: UTTAR PRADESH FORM (ORIGINAL)           -->
+    <!-- ============================================== -->
+    <div id="upFormContainer" class="tab-content active-tab">
+        <h2>UP INCOME</h2>
+        
+        <div class="form-group full-width">
+            <label>ज़िला खोजें (Search District):</label>
+            <input type="text" id="districtSearch" placeholder="ज़िले का नाम टाइप करें..." onkeyup="filterDistricts()">
+        </div>
+
+        <form id="incomeFormUP" onsubmit="submitUPForm(event)">
+            <div class="form-grid">
+                
+                <div class="form-group">
+                    <label>ज़िला (District):</label>
+                    <select id="district" required onchange="populateTehsilsUP()">
+                        <option value="">-- ज़िला चुनें --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>तहसील (Tehsil):</label>
+                    <select id="up_tehsil" required onchange="updateSDMUP()">
+                        <option value="">-- पहले ज़िला चुनें --</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>वर्तमान एस.डी.एम (Current SDM Name):</label>
+                    <input type="text" id="sdmName" readonly placeholder="तहसील चुनने पर स्वतः आ जाएगा">
+                </div>
+
+                <div class="form-group">
+                    <label>थाना (Thana):</label>
+                    <select id="thana" required>
+                        <option value="">-- पहले ज़िला चुनें --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Name in English:</label>
+                    <input type="text" id="nameEn" required placeholder="e.g. harish panwar">
+                </div>
+
+                <div class="form-group">
+                    <label>नाम हिंदी में:</label>
+                    <input type="text" id="nameHi" required placeholder="हिंदी में नाम दर्ज करें">
+                </div>
+
+                <div class="form-group">
+                    <label>संबंध (Relationship):</label>
+                    <select id="relationship" required onchange="updateRelativeLabelUP()">
+                        <option value="पिता">पुत्र/पुत्री (पिता)</option>
+                        <option value="पति">पत्नी (पति)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="relativeLabel">पिता का नाम:</label>
+                    <input type="text" id="relativeName" required placeholder="पिता/पति का नाम">
+                </div>
+
+                <div class="form-group">
+                    <label>माता का नाम:</label>
+                    <input type="text" id="motherName" required placeholder="माता का नाम">
+                </div>
+
+                <div class="form-group">
+                    <label>मकान नंबर:</label>
+                    <input type="text" id="houseNo" required placeholder="मकान नंबर">
+                </div>
+
+                <div class="form-group">
+                    <label>मोहल्ला:</label>
+                    <input type="text" id="mohalla" required placeholder="मोहल्ले का नाम">
+                </div>
+
+                <div class="form-group">
+                    <label>ग्राम (Village):</label>
+                    <input type="text" id="village" required placeholder="ग्राम का नाम">
+                </div>
+
+                <div class="form-group">
+                    <label>मासिक आय (Monthly Income):</label>
+                    <select id="monthlyIncome" required onchange="calculateAnnual()">
+                        <option value="">-- चुनें --</option>
+                        <option value="8000">8000</option>
+                        <option value="8100">8100</option>
+                        <option value="8200">8200</option>
+                        <option value="8300">8300</option>
+                        <option value="8400">8400</option>
+                        <option value="8500">8500</option>
+                        <option value="8600">8600</option>
+                        <option value="8700">8700</option>
+                        <option value="8800">8800</option>
+                        <option value="8900">8900</option>
+                        <option value="9000">9000</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>मासिक आय (शब्दों में):</label>
+                    <input type="text" id="monthlyWords" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>वार्षिक आय (Auto Calculated):</label>
+                    <input type="text" id="annualIncome" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>वार्षिक आय (शब्दों में):</label>
+                    <input type="text" id="annualWords" readonly>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>आवेदक का फोटो (Applicant Photo):</label>
+                    <input type="file" id="applicantPhoto" accept="image/png, image/jpeg" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <button type="submit" class="submit-btn" id="submitBtnUP">Generate & Download UP PDF</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- TAB 2: PUNJAB FORM                             -->
+    <!-- ============================================== -->
+    <div id="pbFormContainer" class="tab-content">
+        <h2 style="color: var(--pb-color); border-bottom: 2px solid var(--pb-color);">Income Certificate - PUNJAB</h2>
+        
+        <form id="incomeFormPB" onsubmit="submitPBForm(event)">
+            <div class="form-grid">
+                
+                <div class="form-group">
+                    <label>DISTRICT:</label>
+                    <select id="DISS" name="DISS" required onchange="populateTehsilsPB()">
+                        <option value="">-- SELECT DISTRICT --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>TEHSIL:</label>
+                    <select id="TEHSIL" name="TEHSIL" required onchange="updateTehsilDataPB()">
+                        <option value="">-- SELECT TEHSIL --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>PINCODE (Auto-selected):</label>
+                    <input type="text" id="PIN" name="PIN" readonly placeholder="Pin Code">
+                </div>
+                
+                <div class="form-group">
+                    <label>SDM NAME (Auto-selected):</label>
+                    <input type="text" id="SDM" name="SDM" readonly placeholder="SDM Name">
+                </div>
+
+                <div class="form-group">
+                    <label>APPLICANT NAME:</label>
+                    <input type="text" id="NAME" name="NAME" class="uppercase-input" required placeholder="ENTER FULL NAME">
+                </div>
+
+                <div class="form-group">
+                    <label>RELATIONSHIP:</label>
+                    <select id="REL" name="REL" required onchange="updateRelLabelPB()">
+                        <option value="S/O">SON OF (S/O)</option>
+                        <option value="D/O">DAUGHTER OF (D/O)</option>
+                        <option value="W/O">WIFE OF (W/O)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="pbFnameLabel">FATHER NAME:</label>
+                    <input type="text" id="FNAME" name="FNAME" class="uppercase-input" required placeholder="FATHER / HUSBAND NAME">
+                </div>
+
+                <div class="form-group">
+                    <label>HOUSE NUMBER (मकान नंबर):</label>
+                    <input type="text" id="MN" name="MN" maxlength="4" pattern="[0-9]{1,4}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required placeholder="E.G. 123 (Max 4 Digits)">
+                </div>
+
+                <div class="form-group">
+                    <label>VILLAGE / CITY:</label>
+                    <input type="text" id="VILL" name="VILL" class="uppercase-input" required placeholder="ENTER VILLAGE NAME">
+                </div>
+
+                <div class="form-group">
+                    <label>ANNUAL INCOME (₹):</label>
+                    <input type="number" id="INCOME" name="INCOME" required placeholder="E.G. 95000">
+                </div>
+
+                <div class="form-group full-width">
+                    <label>UPLOAD PHOTO:</label>
+                    <input type="file" id="PHOTO" accept="image/png, image/jpeg" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <button type="submit" class="submit-btn pb-btn" id="submitBtnPB">Generate & Download Punjab PDF</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- COMMON LOADER & PDF PREVIEW SECTION (WORKS FOR BOTH UP & PUNJAB) -->
+    <div id="loadingMsg">
+        कृपया प्रतीक्षा करें... PDF जनरेट हो रही है (इसमें 10-15 सेकंड लग सकते हैं)...
+    </div>
+
+    <div id="previewSection">
+        <h3 style="color: var(--success); text-align: center;">✅ PDF सफलता पूर्वक बन गई है!</h3>
+        <p style="text-align: center;">नीचे आपकी PDF का प्रीव्यू है। फाइल ऑटोमैटिकली डाउनलोड भी हो गई है।</p>
+        <button class="submit-btn download-btn" onclick="forceDownload()">मैनुअल PDF डाउनलोड करें</button>
+        <iframe id="pdfPreview" class="preview-frame" src=""></iframe>
+    </div>
+
+</div>
+
+<script>
+    // ==========================================
+    // URLs CONFIGURATION
+    // ==========================================
+    const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFwZgOYMNluatfb38sUlHW_8FGSZ_n-Z24LzOESMNZQn_6XY-Kxhz3xG9scp_s2RwX/exec';
+    const PB_GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2mDQnmHLC9VZAdaU2Ww5VzMD2bJh9xUuB-GEwJERABcUuA1hEyJ0Ek1Hc5sc-mHt_/exec';
+
+    let currentBlobUrl = "";
+    let currentFilename = "Income_Certificate.pdf";
+
+    // ==========================================
+    // 1. STATE SWITCHING LOGIC
+    // ==========================================
+    function switchState() {
+        const state = document.getElementById("stateSelect").value;
+        document.getElementById("previewSection").style.display = "none";
+        document.getElementById("loadingMsg").style.display = "none";
+
+        if(state === "UP") {
+            document.getElementById("upFormContainer").classList.add("active-tab");
+            document.getElementById("pbFormContainer").classList.remove("active-tab");
+        } else {
+            document.getElementById("pbFormContainer").classList.add("active-tab");
+            document.getElementById("upFormContainer").classList.remove("active-tab");
+        }
+    }
+
+    // ==========================================
+    // 2. UTTAR PRADESH DATA & LOGIC
+    // ==========================================
+    const locationDataUP = {
+        "आगरा": { tehsils: { "आगरा सदर": "RAJEEV KUMAR", "एतमादपुर": "SNEHA CHAUHAN", "किरावली": "AMIT PRATAP", "खेरागढ़": "ANIL KUMAR", "फतेहाबाद": "MANOJ SINGH", "बाह": "PRIYANKA SHARMA" }, thanas: ["हरीपर्वत", "ताजगंज", "सिकंदरा", "शाहगंज", "कोतवाली"] },
+        "अलीगढ़": { tehsils: { "कोल": "RAHUL YADAV", "अतरौली": "KAVITA SINGH", "गभाना": "SURESH CHANDRA", "खैर": "DEEPAK KUMAR", "इगलास": "VIKAS TOMAR" }, thanas: ["बन्नादेवी", "सिविल लाइन", "क्वार्सी", "सासनी गेट"] },
+        "प्रयागराज": { tehsils: { "सदर": "AJAY KUMAR", "सोरांव": "POOJA MISHRA", "फूलपुर": "SANJAY PANDEY", "हंडिया": "AMIT KUMAR", "मेजा": "VIVEK SINGH" }, thanas: ["कर्नलगंज", "जॉर्जटाउन", "सिविल लाइंस", "धूमणगंज"] },
+        "बागपत": { tehsils: { "बागपत": "MANISH TYAGI", "बड़ौत": "SUBHASH SINGH", "खेकड़ा": "ARVIND KUMAR" }, thanas: ["बागपत कोतवाली", "बड़ौत", "खेकड़ा", "बिनौली", "छपरौली"] },
+        "गौतम बुद्ध नगर": { tehsils: { "सदर": "ROHIT RAJPUT", "दादरी": "VANDANA SINGH", "जेवर": "KAPIL DEV" }, thanas: ["नोएडा सेक्टर 20", "सूरजपुर", "दादरी", "कासना"] },
+        "गाज़ियाबाद": { tehsils: { "सदर": "AKHILESH YADAV", "मोदीनगर": "SHALINI TOMAR", "लोनी": "PRAMOD KUMAR" }, thanas: ["सिहानी गेट", "कविनगर", "इंद्रापुरम", "लोनी", "मोदीनगर"] },
+        "मेरठ": { tehsils: { "मेरठ सदर": "RAKESH KUMAR", "मवाना": "SARITA SINGH", "सरधना": "ANAND PRAKASH" }, thanas: ["लालकुर्ती", "सिविल लाइन", "नौचंदी", "परतापुर"] },
+        "लखनऊ": { tehsils: { "सदर": "VIJAY PRATAP", "मलिहाबाद": "ANUPAM MISHRA", "बख्शी का तालाब": "NEELAM RAJPUT", "मोहनलालगंज": "ROHIT CHANDRA" }, thanas: ["हजरतगंज", "गोमती नगर", "आलमबाग", "तालकटोरा"] },
+        "कानपुर नगर": { tehsils: { "सदर": "AMIT BHATT", "बिल्हौर": "SUSHMA REDDY", "घाटमपुर": "DINESH SHARMA", "नर्वल": "KAMAL NATH" }, thanas: ["काकादेव", "कल्याणपुर", "ग्वालटोली", "बाबूपुरवा"] },
+        "वाराणसी": { tehsils: { "सदर": "SHIVENDRA SINGH", "पिंडरा": "RUCHI YADAV", "राजातालाब": "MANOJ PANDEY" }, thanas: ["दशाश्वमेध", "भेलूपुर", "छावनी", "लंका"] },
+        "गोरखपुर": { tehsils: { "सदर": "AMITESH SINGH", "कैम्पियरगंज": "RAHUL SHUKLA", "बांसगांव": "SAVITA DEVI", "खजनी": "SURAJ KUMAR" }, thanas: ["कैंट", "कोतवाली", "गोरखनाथ", "रामगढ़ ताल"] },
+        "बरेली": { tehsils: { "सदर": "VIPIN KUMAR", "फरीदपुर": "MAMTA SHARMA", "आंवला": "RAVI VERMA", "बहेड़ी": "KISHORE DAS" }, thanas: ["कोतवाली", "बारादरी", "प्रेमनगर", "सुभाषनगर"] },
+        "मुरादाबाद": { tehsils: { "सदर": "ARJUN SINGH", "बिलारी": "SUNITA YADAV", "कांठ": "PRADEEP KUMAR", "ठाकुरद्वारा": "MANISH RATHI" }, thanas: ["सिविल लाइन", "कटघर", "मझोला", "गलशहीद"] },
+        "सहारनपुर": { tehsils: { "सदर": "KARAN CHOUDHARY", "देवबंद": "ALOK SINGH", "नकुड़": "MEENAKSHI TOMAR", "बेहट": "TARUN KUMAR" }, thanas: ["कुतुबशेर", "मंडी", "जनकपुरी", "देवबंद"] },
+        "मथुरा": { tehsils: { "सदर": "VIKRAM SINGH", "छाता": "KIRAN BALA", "मांट": "RAJESH CHATURVEDI", "गोवर्धन": "AMIT GARG", "महावन": "SANDEEP KUMAR" }, thanas: ["कोतवाली", "वृंदावन", "गोवर्धन", "फरह"] }
+    };
+
+    const hindiNumbers = { 0: 'शून्य', 1: 'एक', 2: 'दो', 3: 'तीन', 4: 'चार', 5: 'पांच', 6: 'छह', 7: 'सात', 8: 'आठ', 9: 'नौ', 10: 'दस', 11: 'ग्यारह', 12: 'बारह', 13: 'तेरह', 14: 'चौदह', 15: 'पंद्रह', 16: 'सोलह', 17: 'सत्रह', 18: 'अठारह', 19: 'उन्नीस', 20: 'बीस', 21: 'इक्कीस', 22: 'बाईस', 23: 'तेईस', 24: 'चौबीस', 25: 'पच्चीस', 26: 'छब्बीस', 27: 'सत्ताईस', 28: 'अट्ठाईस', 29: 'उनतीस', 30: 'तीस', 31: 'इकत्तीस', 32: 'बत्तीस', 33: 'तैंतीस', 34: 'चौंतीस', 35: 'पैंतीस', 36: 'छत्तीस', 37: 'सैंतीस', 38: 'अड़तीस', 39: 'उनतालीस', 40: 'चालीस', 41: 'इकतालीस', 42: 'बयालीस', 43: 'तैंतालीस', 44: 'चौवालीस', 45: 'पैंतालीस', 46: 'छियालीस', 47: 'सैंतालीस', 48: 'अड़तालीस', 49: 'उनचास', 50: 'पचास', 51: 'इक्यावन', 52: 'बावन', 53: 'तिरेपन', 54: 'चौवन', 55: 'पचपन', 56: 'छप्पन', 57: 'सत्तावन', 58: 'अट्ठावन', 59: 'उनसठ', 60: 'साठ', 61: 'इकसठ', 62: 'बासठ', 63: 'तिरसठ', 64: 'चौंसठ', 65: 'पैंसठ', 66: 'छियासठ', 67: 'सड़सठ', 68: 'अड़सठ', 69: 'उनहत्तर', 70: 'सत्तर', 71: 'इकहत्तर', 72: 'बहत्तर', 73: 'तिहत्तर', 74: 'चौहत्तर', 75: 'पचहत्तर', 76: 'छिहत्तर', 77: 'सतहत्तर', 78: 'अठहत्तर', 79: 'उनासी', 80: 'अस्सी', 81: 'इक्यासी', 82: 'बयासी', 83: 'तिरासी', 84: 'चौरासी', 85: 'पचासी', 86: 'छियासी', 87: 'सत्तासी', 88: 'अट्ठासी', 89: 'नवासी', 90: 'नब्बे', 91: 'इक्यानवे', 92: 'बानवे', 93: 'तिरानवे', 94: 'चौरानवे', 95: 'पचानवे', 96: 'छियानवे', 97: 'सत्तानवे', 98: 'अट्ठानवे', 99: 'निन्यानवे', 100: 'एक सौ' };
+
+    function convertToHindiWords(num) {
+        if (num === 0) return hindiNumbers[0];
+        let words = '';
+        let lakhs = Math.floor(num / 100000); num %= 100000;
+        let thousands = Math.floor(num / 1000); num %= 1000;
+        let hundreds = Math.floor(num / 100); num %= 100;
+        let tensAndOnes = num;
+
+        if (lakhs > 0) words += hindiNumbers[lakhs] + ' लाख ';
+        if (thousands > 0) words += hindiNumbers[thousands] + ' हज़ार ';
+        if (hundreds > 0) words += hindiNumbers[hundreds] + ' सौ ';
+        if (tensAndOnes > 0) words += hindiNumbers[tensAndOnes] + ' ';
+        return words.trim();
+    }
+
+    function initUPData() {
+        const districtSelect = document.getElementById("district");
+        for (let dist in locationDataUP) {
+            districtSelect.options.add(new Option(dist, dist));
+        }
+    }
+
+    function filterDistricts() {
+        let input = document.getElementById('districtSearch').value.toLowerCase();
+        let districtSelect = document.getElementById("district");
+        districtSelect.innerHTML = '<option value="">-- ज़िला चुनें --</option>';
+        for (let dist in locationDataUP) {
+            if (dist.toLowerCase().includes(input)) {
+                districtSelect.options.add(new Option(dist, dist));
+            }
+        }
+    }
+
+    function populateTehsilsUP() {
+        const district = document.getElementById("district").value;
+        const tehsilSelect = document.getElementById("up_tehsil");
+        const thanaSelect = document.getElementById("thana");
+        const sdmName = document.getElementById("sdmName");
+        
+        tehsilSelect.innerHTML = '<option value="">-- तहसील चुनें --</option>';
+        thanaSelect.innerHTML = '<option value="">-- थाना चुनें --</option>';
+        sdmName.value = "";
+
+        if (district !== "") {
+            for (let tehsil in locationDataUP[district].tehsils) {
+                tehsilSelect.options.add(new Option(tehsil, tehsil));
+            }
+            locationDataUP[district].thanas.forEach(thana => {
+                thanaSelect.options.add(new Option(thana, thana));
+            });
+        }
+    }
+
+    function updateSDMUP() {
+        const district = document.getElementById("district").value;
+        const tehsil = document.getElementById("up_tehsil").value;
+        document.getElementById("sdmName").value = (district && tehsil) ? locationDataUP[district].tehsils[tehsil] : "";
+    }
+
+    function updateRelativeLabelUP() {
+        const rel = document.getElementById("relationship").value;
+        document.getElementById("relativeLabel").innerText = (rel === "पिता") ? "पिता का नाम:" : "पति का नाम:";
+    }
+
+    function calculateAnnual() {
+        const monthly = parseInt(document.getElementById("monthlyIncome").value);
+        if (monthly) {
+            const annual = monthly * 12;
+            document.getElementById("annualIncome").value = annual;
+            document.getElementById("monthlyWords").value = convertToHindiWords(monthly);
+            document.getElementById("annualWords").value = convertToHindiWords(annual);
+        }
+    }
+    
+    function base64ToBlob(base64, mimeType) {
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], {type: mimeType});
+    }
+
+    async function submitUPForm(event) {
+        event.preventDefault();
+        const fileInput = document.getElementById('applicantPhoto');
+        if (fileInput.files.length === 0) {
+            alert("कृपया फोटो अपलोड करें।");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtnUP');
+        const loader = document.getElementById('loadingMsg');
+        const previewSec = document.getElementById('previewSection');
+        
+        btn.disabled = true;
+        loader.style.display = 'block';
+        previewSec.style.display = 'none';
+        
+        if (currentBlobUrl) {
+            URL.revokeObjectURL(currentBlobUrl);
+        }
+
+        const reader = new FileReader();
+        reader.onload = async function () {
+            const base64Photo = reader.result; 
+
+            const formData = {
+                district: document.getElementById('district').value,
+                tehsil: document.getElementById('up_tehsil').value,
+                sdm: document.getElementById('sdmName').value,
+                thana: document.getElementById('thana').value,
+                nameEn: document.getElementById('nameEn').value,
+                nameHi: document.getElementById('nameHi').value,
+                relationship: document.getElementById('relationship').value,
+                relativeName: document.getElementById('relativeName').value,
+                motherName: document.getElementById('motherName').value,
+                houseNo: document.getElementById('houseNo').value,
+                mohalla: document.getElementById('mohalla').value,
+                village: document.getElementById('village').value,
+                monthlyIncome: document.getElementById('monthlyIncome').value,
+                monthlyWords: document.getElementById('monthlyWords').value,
+                annualIncome: document.getElementById('annualIncome').value,
+                annualWords: document.getElementById('annualWords').value,
+                photoBase64: base64Photo
+            };
+
+            try {
+                const response = await fetch(GOOGLE_APP_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    loader.style.display = 'none';
+                    const pdfBlob = base64ToBlob(result.pdf_base64, 'application/pdf');
+                    currentBlobUrl = URL.createObjectURL(pdfBlob);
+                    currentFilename = result.filename;
+                    
+                    previewSec.style.display = 'block';
+                    document.getElementById('pdfPreview').src = currentBlobUrl;
+                    forceDownload();
+                    btn.disabled = false;
+                } else {
+                    alert("Error: " + result.message);
+                    loader.style.display = 'none';
+                    btn.disabled = false;
+                }
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                alert("सर्वर से कनेक्ट करने में समस्या आई।");
+                loader.style.display = 'none';
+                btn.disabled = false;
+            }
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+
+    function forceDownload() {
+        if(currentBlobUrl) {
+            let a = document.createElement('a');
+            a.href = currentBlobUrl;
+            a.target = '_blank';
+            a.download = currentFilename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    }
+
+
+    // ==========================================
+    // 3. PUNJAB DATA & LOGIC
+    // ==========================================
+    const pbData = {
+        "AMRITSAR": { 
+            "AMRITSAR-I": { pin: "143001", sdm: "Harpreet Singh" },
+            "AMRITSAR-II": { pin: "143002", sdm: "Jaswinder Kaur" },
+            "AJNALA": { pin: "143102", sdm: "Rajesh Sharma" },
+            "BABA BAKALA": { pin: "143201", sdm: "Amritpal Singh" },
+            "MAJITHA": { pin: "143601", sdm: "Sukhdev Singh" }
+        },
+        "LUDHIANA": { 
+            "LUDHIANA EAST": { pin: "141001", sdm: "Gaurav Kumar" },
+            "LUDHIANA WEST": { pin: "141002", sdm: "Anita Rani" },
+            "JAGRAON": { pin: "142026", sdm: "Vikas Singh" },
+            "KHANNA": { pin: "141401", sdm: "Rahul Verma" },
+            "RAIKOT": { pin: "141109", sdm: "Navdeep Singh" },
+            "SAMRALA": { pin: "141114", sdm: "Priyanka Sharma" }
+        },
+        "JALANDHAR": { 
+            "JALANDHAR-I": { pin: "144001", sdm: "Balwinder Sandhu" },
+            "JALANDHAR-II": { pin: "144002", sdm: "Gurpreet Singh" },
+            "NAKODAR": { pin: "144040", sdm: "Priya Verma" },
+            "PHILLAUR": { pin: "144410", sdm: "Amit Kumar" },
+            "SHAHKOT": { pin: "144702", sdm: "Simran Kaur" }
+        },
+        "PATIALA": { 
+            "PATIALA": { pin: "147001", sdm: "Amit Gupta" },
+            "NABHA": { pin: "147201", sdm: "Gurmeet Singh" },
+            "RAJPURA": { pin: "140401", sdm: "Sandeep Kaur" },
+            "SAMANA": { pin: "147101", sdm: "Rajat Sharma" },
+            "PATRAN": { pin: "147105", sdm: "Vikram Singh" }
+        },
+        "BATHINDA": { 
+            "BATHINDA": { pin: "151001", sdm: "Rohan Das" },
+            "RAMPURA PHUL": { pin: "151103", sdm: "Kamaljeet Kaur" },
+            "TALWANDI SABO": { pin: "151302", sdm: "Kiran Bala" },
+            "MAUR": { pin: "151509", sdm: "Deepak Garg" }
+        },
+        "HOSHIARPUR": {
+            "HOSHIARPUR": { pin: "146001", sdm: "Vijay Kumar" },
+            "DASUYA": { pin: "144205", sdm: "Surinder Pal" },
+            "MUKERIAN": { pin: "144211", sdm: "Mandeep Singh" },
+            "GARHSHANKAR": { pin: "144527", sdm: "Neelam Rani" }
+        },
+        "GURDASPUR": {
+            "GURDASPUR": { pin: "143521", sdm: "Ashok Kumar" },
+            "BATALA": { pin: "143505", sdm: "Rajesh Chander" },
+            "DERA BABA NANAK": { pin: "143604", sdm: "Karnail Singh" },
+            "DINA NAGAR": { pin: "143531", sdm: "Sunita Devi" }
+        },
+        "FEROZEPUR": {
+            "FEROZEPUR": { pin: "152001", sdm: "Manjit Singh" },
+            "ZIRA": { pin: "142047", sdm: "Parminder Kaur" },
+            "GURUHARSAHAI": { pin: "152022", sdm: "Harish Chander" }
+        },
+        "SAS NAGAR (MOHALI)": {
+            "MOHALI": { pin: "160055", sdm: "Sarabjit Singh" },
+            "KHARAR": { pin: "140301", sdm: "Jagdeep Singh" },
+            "DERA BASSI": { pin: "140507", sdm: "Poonam Sharma" }
+        },
+        "SANGRUR": {
+            "SANGRUR": { pin: "148001", sdm: "Vinay Kumar" },
+            "SUNAM": { pin: "148028", sdm: "Rajinder Singh" },
+            "DHURI": { pin: "148024", sdm: "Meenakshi" },
+            "LEHRA": { pin: "148031", sdm: "Anil Garg" }
+        },
+        "FARIDKOT": {
+            "FARIDKOT": { pin: "151203", sdm: "Tarlochan Singh" },
+            "KOTKAPURA": { pin: "151204", sdm: "Jasbir Kaur" },
+            "JAITU": { pin: "151202", sdm: "Kawaljit Singh" }
+        },
+        "MOGA": {
+            "MOGA": { pin: "142001", sdm: "Sanjeev Kumar" },
+            "BAGHAPURANA": { pin: "142038", sdm: "Narinder Singh" },
+            "NIHAL SINGH WALA": { pin: "142055", sdm: "Hardial Singh" },
+            "DHARAMKOT": { pin: "142042", sdm: "Gurtej Singh" }
+        },
+        "TARN TARAN": {
+            "TARN TARAN": { pin: "143401", sdm: "Bhupinder Singh" },
+            "PATTI": { pin: "143416", sdm: "Lakhwinder Singh" },
+            "KHADOOR SAHIB": { pin: "143117", sdm: "Amarjit Singh" },
+            "BHIKHIWIND": { pin: "143303", sdm: "Sukhwinder Kaur" }
+        },
+        "KAPURTHALA": {
+            "KAPURTHALA": { pin: "144601", sdm: "Rakesh Kumar" },
+            "PHAGWARA": { pin: "144401", sdm: "Anurag Chander" },
+            "SULTANPUR LODHI": { pin: "144626", sdm: "Gurdev Singh" },
+            "BHOLATH": { pin: "144622", sdm: "Darshan Singh" }
+        },
+        "RUPNAGAR (ROPAR)": {
+            "RUPNAGAR": { pin: "140001", sdm: "Satish Kumar" },
+            "ANANDPUR SAHIB": { pin: "140118", sdm: "Mohinder Singh" },
+            "CHAMKAUR SAHIB": { pin: "140112", sdm: "Raman Kumar" },
+            "NANGAL": { pin: "140124", sdm: "Sunil Dogra" }
+        }
+    };
+
+    // Force Uppercase on Punjab Fields
+    document.querySelectorAll('.uppercase-input').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+    });
+
+    window.onload = function() {
+        initUPData();
+        initPunjabData();
+    };
+
+    function initPunjabData() {
+        const pbDiss = document.getElementById("DISS");
+        for (let dist in pbData) {
+            pbDiss.options.add(new Option(dist, dist));
+        }
+    }
+
+    function populateTehsilsPB() {
+        const dist = document.getElementById("DISS").value;
+        const tehsilSelect = document.getElementById("TEHSIL");
+        const pinInput = document.getElementById("PIN");
+        const sdmInput = document.getElementById("SDM");
+        
+        tehsilSelect.innerHTML = '<option value="">-- SELECT TEHSIL --</option>';
+        pinInput.value = "";
+        sdmInput.value = "";
+
+        if (dist !== "") {
+            for (let tehsil in pbData[dist]) {
+                tehsilSelect.options.add(new Option(tehsil, tehsil));
+            }
+        }
+    }
+
+    function updateTehsilDataPB() {
+        const dist = document.getElementById("DISS").value;
+        const tehsil = document.getElementById("TEHSIL").value;
+        const pinInput = document.getElementById("PIN");
+        const sdmInput = document.getElementById("SDM");
+
+        if (dist && tehsil) {
+            const data = pbData[dist][tehsil];
+            pinInput.value = data.pin;
+            sdmInput.value = toTitleCase(data.sdm);
+        } else {
+            pinInput.value = "";
+            sdmInput.value = "";
+        }
+    }
+
+    function toTitleCase(str) {
+        return str.toLowerCase().split(' ').map(function(word) {
+            return (word.charAt(0).toUpperCase() + word.slice(1));
+        }).join(' ');
+    }
+
+    function updateRelLabelPB() {
+        const rel = document.getElementById("REL").value;
+        const label = document.getElementById("pbFnameLabel");
+        
+        if (rel === "W/O") {
+            label.innerText = "HUSBAND NAME:";
+        } else {
+            label.innerText = "FATHER NAME:";
+        }
+    }
+
+    function getBase64(file) {
+       return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.readAsDataURL(file);
+         reader.onload = () => resolve(reader.result.split(',')[1]);
+         reader.onerror = error => reject(error);
+       });
+    }
+
+    async function submitPBForm(e) {
+        e.preventDefault();
+        
+        const photoFile = document.getElementById("PHOTO").files[0];
+        if(!photoFile) {
+            alert("Please upload Photo.");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtnPB');
+        const loader = document.getElementById('loadingMsg');
+        const previewSec = document.getElementById('previewSection');
+
+        btn.disabled = true;
+        loader.style.display = 'block';
+        previewSec.style.display = 'none';
+
+        if (currentBlobUrl) {
+            URL.revokeObjectURL(currentBlobUrl);
+        }
+
+        try {
+            const photoB64 = await getBase64(photoFile);
+
+            const formData = {
+                DISS: document.getElementById("DISS").value,
+                TEHSIL: document.getElementById("TEHSIL").value,
+                PIN: document.getElementById("PIN").value,
+                NAME: document.getElementById("NAME").value.toUpperCase(),
+                REL: document.getElementById("REL").value,
+                FNAME: document.getElementById("FNAME").value.toUpperCase(),
+                MN: document.getElementById("MN").value,
+                VILL: document.getElementById("VILL").value.toUpperCase(),
+                INCOME: document.getElementById("INCOME").value,
+                SDM: document.getElementById("SDM").value,
+                PHOTO_DATA: photoB64
+            };
+
+            const response = await fetch(PB_GOOGLE_APP_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                loader.style.display = 'none';
+                const pdfBlob = base64ToBlob(result.pdf_base64, 'application/pdf');
+                currentBlobUrl = URL.createObjectURL(pdfBlob);
+                currentFilename = result.filename;
+
+                previewSec.style.display = 'block';
+                document.getElementById('pdfPreview').src = currentBlobUrl;
+                forceDownload();
+                btn.disabled = false;
+            } else {
+                alert("Error: " + result.message);
+                loader.style.display = 'none';
+                btn.disabled = false;
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("सर्वर से कनेक्ट करने में समस्या आई।");
+            loader.style.display = 'none';
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
